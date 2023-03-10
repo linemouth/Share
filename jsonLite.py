@@ -4,30 +4,44 @@ import io, math, re
 class RegexReader:
     @property
     def HasNext(self):
-        #if(isinstance(self.stream, io.IOBase)):
-        #    position = self.stream.tell()
-        return len(self.stream) > 0
-    def __init__(self, stream):
-        self.stream = stream
+        return len(self.buffer) > 0
+    
+    def __init__(self, stream, minBufferSize = 0x400000, debug = False):
+        self.minBufferSize = minBufferSize
+        self.debug = debug
+        if(isinstance(stream, io.IOBase)):
+            self.stream = stream
+            self.buffer = self.stream.read(self.minBufferSize * 2)
+        elif(isinstance(stream, str)):
+            self.stream = None
+            self.buffer = stream
     def __repr__(self):
-        return "RegexReader[{}]".format(len(self.stream))
+        return "RegexReader[{}]".format(len(self.buffer))
     def TryReadRegex(self, pattern):
-        match = pattern.match(self.stream)
+        if(self.debug):
+            print(len(self.buffer))
+        match = pattern.match(self.buffer)
         if(match != None):
-            self.stream = self.stream[match.end():]
+            self.buffer = self.buffer[match.end():]
+            if(isinstance(self.stream, io.IOBase) and len(self.buffer) < self.minBufferSize):
+                self.buffer += self.stream.read(self.minBufferSize)
         return match
+    def Peek(self, length = 1):
+        return self.buffer[:length]
+    def PeekLine(self):
+        return self.buffer.split("\n", 1)[0]
 class SerializerOptions:
-    def __init__(self):
-        self.keyQuotes = True
-        self.scope = 0
-        self.indent = "    "
-        self.newline = "\n"
-        self.bracesSpacing = "newline"
-        self.bracketsSpacing = "space"
-        self.commaSpacing = "space"
-        self.spaceAfterColon = True
-        self.includeNull = True
-        self.order = []
+    def __init__(self, keyQuotes = True, scope = 0, indent = "    ", newline = "\n", bracesSpacing = "newline", bracketsSpacing = "space", commaSpacing = "space", spaceAfterColon = True, includeNull = True, order = []):
+        self.keyQuotes = keyQuotes
+        self.scope = scope
+        self.indent = indent
+        self.newline = newline
+        self.bracesSpacing = bracesSpacing
+        self.bracketsSpacing = bracketsSpacing
+        self.commaSpacing = commaSpacing
+        self.spaceAfterColon = spaceAfterColon
+        self.includeNull = includeNull
+        self.order = order
 class Json(OrderedDict):
     nameNeedsQuotesRegex_ = re.compile(r"[\s:]", re.MULTILINE)
     keyRegex_ = re.compile(r"\s*(?:(?P<quote>\"|')(?P<quotedKey>.*?)(?P=quote)|(?P<key>\w+))\s*:\s*", re.MULTILINE)
@@ -65,6 +79,30 @@ class Json(OrderedDict):
                 if(other[key] != value):
                     return False
         return True
+    def Get(self, key, defaultValue = None):
+        if(isinstance(key, list)):
+            if(len(key) == 0):
+                raise KeyError("Can't navigate to zero-length path.")
+            elif(len(key) == 1):
+                return self.Get(key[0], defaultValue)
+            else:
+                return self[key[0]].Get(key[1:], defaultValue) if(key[0] in self) else defaultValue
+        else:
+            return self[key] if(key in self) else defaultValue
+    def Set(self, key, value):
+        if(isinstance(key, list)):
+            if(len(key) == 0):
+                raise KeyError("Can't navigate to zero-length path.")
+            elif(len(key) == 1):
+                self.Set(key[0], value)
+            elif(key[0] in self):
+                self[key[0]].Set(key[1:], value)
+            else:
+                json = Json()
+                json.Set(key[1:], value)
+                self[key] = json
+        else:
+            self[key] = value
     def AddComment(key, comment):
         if(key not in self.comments):
             self.comments[key] = [comment]
@@ -102,7 +140,7 @@ class Json(OrderedDict):
                     raise Exception("Could not find object closure.")
                 # Complain
                 else:
-                    raise Exception("Unexpected token")
+                    raise Exception("Unexpected token: '{}'".format(reader.PeekLine()))
         return data
     def ParseList(reader):
         list = []
@@ -136,8 +174,8 @@ class Json(OrderedDict):
             if(keyword in Json.keywords_):
                 return Json.keywords_[keyword]
             else:
-                raise Exception("Unknown keyword: '{}'".format(reader.text.split("\n")[0]))
-        raise Exception("Unexpected token")
+                raise Exception("Unknown keyword: '{}'".format(reader.PeekLine()))
+        raise Exception("Unexpected token: '{}'".format(reader.PeekLine()))
     def Serialize(data, options = SerializerOptions()):
         text = Json.FormatObjectStart(options)
         firstItem = True
@@ -234,7 +272,4 @@ class Json(OrderedDict):
         else:
             raise Exception("Cannot serialize unsupported type '{}'.".format(value.__class__.__name__))
         return text
-
-
-
 
