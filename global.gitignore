@@ -1,0 +1,30 @@
+# IGNORE DIRECTORIES
+.vs
+.vscode
+__pycache__
+obj
+Release
+Debug
+
+# IGNORE FILES
+*desktop.ini
+*.vcxproj.user
+*.csproj.user
+*.pdb
+*.log
+*.bak
+*.o
+*.d
+*.map
+*.mem
+*.db
+*.dba
+*.dla
+*.dnm
+*.emz
+*.dbo
+*.lst
+*.exe.config
+*.settings
+*.TMP
+*.temp

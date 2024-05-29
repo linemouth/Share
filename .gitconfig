@@ -1,0 +1,61 @@
+[user]
+    name = Collin Eddy
+    email = linemouth@gmail.com
+[http]
+    sslBackend = schannel
+    sslVerify = false
+[init]
+    defaultBranch = main
+[alias]
+    hist = log --pretty=format:'%C(white bold)%>|(16)%h%Creset %cd [%C(green)%cn%Creset] %s%C(yellow)%d%Creset' --graph --date=short --decorate-refs-exclude=*/origin/*
+    c = clone --recurse-submodules --jobs 8
+    d = diff
+    dt = difftool
+    dd = difftool --dir-diff --no-symlinks
+    ohwait = commit --amend --no-edit
+    crap = reset --hard && clean -dfq
+    forget = rm -r --cached
+    branches = branch -a
+    sup = !git submodule init && git submodule update --remote --merge --recursive
+[core]
+    autocrlf = true
+    safecrlf = false
+    # Notepad++
+    editor = \"C:/Program Files/Notepad++/notepad++.exe\" -multiInst -notabbar -nosession -noPlugin
+    # Visual Studio Code
+    #editor = code -n --new-window
+    fscache = true
+    symlinks = false
+    excludesfile = C:/Users/Collin/global.gitignore
+[credential]
+    helper = manager
+[filter "lfs"]
+    clean = git-lfs clean -- %f
+    smudge = git-lfs smudge -- %f
+    process = git-lfs filter-process
+    required = true
+[pull]
+    rebase = false
+[push]
+    default = simple
+    autoSetupRemote = true
+    recurseSubmodules = check
+
+[diff]
+    tool = bc4
+[difftool]
+    prompt = false
+    trustExitCode = true
+[difftool "bc4"]
+    path = \"C:/Program Files/Beyond Compare 4/BComp.exe\"
+    cmd = \"C:/Program Files/Beyond Compare 4/BComp.exe\" \"$LOCAL\" \"$REMOTE\"
+
+[merge]
+    tool = bc4
+[mergetool]
+    keepBackup = false
+    prompt = false
+    trustExitCode = true
+[mergetool "bc4"]
+    path = \"C:/Program Files/Beyond Compare 4/BComp.exe\"
+    cmd = \"C:/Program Files/Beyond Compare 4/BComp.exe\" \"$LOCAL\" \"$REMOTE\" \"$BASE\" \"$MERGED\"
