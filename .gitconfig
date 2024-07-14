@@ -8,15 +8,18 @@
     defaultBranch = main
 [alias]
     hist = log --pretty=format:'%C(white bold)%>|(16)%h%Creset %cd [%C(green)%cn%Creset] %s%C(yellow)%d%Creset' --graph --date=short --decorate-refs-exclude=*/origin/*
-    c = clone --recurse-submodules --jobs 8
     d = diff
     dt = difftool
     dd = difftool --dir-diff --no-symlinks
+    github = "!f() { git clone git@github.com:linemouth/$1.git --recurse-submodules --jobs 8; }; f"
     ohwait = commit --amend --no-edit
     crap = reset --hard && clean -dfq
     forget = rm -r --cached
     branches = branch -a
     sup = !git submodule init && git submodule update --remote --merge --recursive
+    pullf = !git fetch && git reset --hard @{u}
+    pushf = push --force
+    rev = !git add . && git ohwait && git pushf
 [core]
     autocrlf = true
     safecrlf = false
@@ -40,7 +43,6 @@
     default = simple
     autoSetupRemote = true
     recurseSubmodules = check
-
 [diff]
     tool = bc4
 [difftool]
