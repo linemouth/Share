@@ -8,16 +8,23 @@
     defaultBranch = main
 [alias]
     hist = log --pretty=format:'%C(white bold)%>|(16)%h%Creset %cd [%C(green)%cn%Creset] %s%C(yellow)%d%Creset' --graph --date=short --decorate-refs-exclude=*/origin/*
-    c = clone --recurse-submodules --jobs 8
+    h = hist -10
+    github = "!f() { \
+        if [ -z \"$1\" ]; then \
+            echo 'Usage: git github <repository>'; \
+        else \
+            git clone --recurse-submodules git@github.com:linemouth/$1.git && cd $1; \
+        fi; \
+    }; f"
     d = diff
     dt = difftool
     dd = difftool --dir-diff --no-symlinks
+    github = "!f() { git clone git@github.com:linemouth/$1.git --recurse-submodules --jobs 8; }; f"
     ohwait = commit --amend --no-edit
-    crap = reset --hard && clean -dfq
     forget = rm -r --cached
     branches = branch -a
     sup = !git submodule init && git submodule update --remote --merge --recursive
-    pullf = !git fetch origin && git reset --hard origin/$(git rev-parse --abbrev-ref HEAD)
+    pullf = !git fetch && git reset --hard @{u}
     pushf = push --force
     rev = !git add . && git ohwait && git pushf
 [core]
@@ -29,14 +36,20 @@
     #editor = code -n --new-window
     fscache = true
     symlinks = false
-    excludesfile = C:/Users/Collin/global.gitignore
 [credential]
     helper = manager
-[filter "lfs"]
-    clean = git-lfs clean -- %f
-    smudge = git-lfs smudge -- %f
-    process = git-lfs filter-process
-    required = true
+# Large File Storage configuration
+#[filter "lfs"]
+#    clean = git-lfs clean -- %f
+#    smudge = git-lfs smudge -- %f
+#    process = git-lfs filter-process
+#    required = true
+[clone]
+    filterSubmodules = true
+[checkout]
+    workers = 8
+[fetch]
+    parallel = 8
 [pull]
     rebase = false
 [push]
