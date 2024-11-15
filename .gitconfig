@@ -1,9 +1,12 @@
+[safe]
+    directory = *
 [user]
     name = Collin Eddy
     email = linemouth@gmail.com
 [http]
-    sslBackend = schannel
     sslVerify = false
+[help]
+    #format = verbose
 [init]
     defaultBranch = main
 [alias]
@@ -19,6 +22,7 @@
     d = diff
     dt = difftool
     dd = difftool --dir-diff --no-symlinks
+    mt = mergetool
     github = "!f() { git clone git@github.com:linemouth/$1.git --recurse-submodules --jobs 8; }; f"
     ohwait = commit --amend --no-edit
     forget = rm -r --cached
@@ -30,10 +34,7 @@
 [core]
     autocrlf = true
     safecrlf = false
-    # Notepad++
-    editor = \"C:/Program Files/Notepad++/notepad++.exe\" -multiInst -notabbar -nosession -noPlugin
-    # Visual Studio Code
-    #editor = code -n --new-window
+    editor = notepad
     fscache = true
     symlinks = false
 [credential]
@@ -55,7 +56,7 @@
 [push]
     default = simple
     autoSetupRemote = true
-    recurseSubmodules = on-demand
+    recurseSubmodules = check
 [diff]
     tool = bc4
 [difftool]
@@ -74,3 +75,6 @@
 [mergetool "bc4"]
     path = \"C:/Program Files/Beyond Compare 4/BComp.exe\"
     cmd = \"C:/Program Files/Beyond Compare 4/BComp.exe\" \"$LOCAL\" \"$REMOTE\" \"$BASE\" \"$MERGED\"
+    trustExitCode = true
+[submodule]
+    recurse = true
